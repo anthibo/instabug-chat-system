@@ -2,9 +2,10 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log"
-	"strconv"
 
+	"message_service/internal/events"
 	"message_service/internal/messaging"
 	"message_service/internal/models"
 	"message_service/internal/repositories"
@@ -16,27 +17,33 @@ type MessageService struct {
 	messaging.EventPublisherManager
 }
 
-func (s *MessageService) CreateMessage(ctx context.Context, message *models.Message, applicationToken string, chatNumber int) error {
-	chat, err := s.ChatRepository.GetChatByChatNumber(ctx, applicationToken, chatNumber)
-	if err != nil {
-		log.Printf("Failed to get chat ID from chat number %d: %v", chatNumber, err)
-		return err
+func (s *MessageService) CreateMessage(ctx context.Context, messageCreationRequestedEvent *models.MessageCreationRequestedEvent) error {
+	message := &models.Message{
+		ChatID: messageCreationRequestedEvent.ChatID,
+		Body:   messageCreationRequestedEvent.Body,
+		Number: messageCreationRequestedEvent.MessageNumber,
 	}
-	message.ChatID = chat.ID
-
 	if err := s.MessageRepository.CreateMessage(ctx, message); err != nil {
 		return err
 	}
-	log.Printf("Created message with ID %d for chat %d", message.ID, message.ChatID)
+	log.Printf("Created message with ID %d for chat %d", message.ID, messageCreationRequestedEvent.ChatID)
 
-	// TODO: Implement Better Event Handling Approach
-	event := "message_created"
-	eventData := []byte(`{"id":` + strconv.Itoa(message.ID) + `,"chat_id":` + strconv.Itoa(message.ChatID) + `,"body":"` + message.Body + `","created_at":"` + message.CreatedAt + `"}`)
+	messageCreatedEventData := &models.MessageCreatedEvent{
+		MessageID: message.ID,
+		Number:    message.Number,
+		ChatID:    message.ChatID,
+		Body:      message.Body,
+	}
 
 	// TODO: add retry logic here for more resiliency
-	log.Println("Publishing Event Created Event")
-	if err := s.EventPublisherManager.PublishEvent(event, eventData); err != nil {
-		log.Printf("Failed to publish event %s: %v", event, err)
+	log.Println("Publishing Message Created Event")
+	messageCreatedEventQueue, exists := events.GetEventQueue(events.MessageCreatedQueue)
+	if !exists {
+		fmt.Println("event queue not found")
+		return nil
+	}
+	if err := s.EventPublisherManager.PublishEvent(messageCreatedEventQueue, messageCreatedEventData); err != nil {
+		log.Printf("Failed to publish event %s: %v", messageCreatedEventQueue.Name, err)
 		return err
 	}
 

@@ -6,4 +6,5 @@ import (
 
 type AppDIContainer struct {
 	ApiCmdHandlers *handlers.ApiCmdHandlers
+	EventHandlers  *handlers.EventHandler
 }

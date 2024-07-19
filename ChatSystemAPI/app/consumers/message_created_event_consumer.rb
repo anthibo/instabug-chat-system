@@ -1,8 +1,8 @@
-class MessageCreatedElasticsearchConsumer
+class MessageCreatedEventConsumer
   def self.start
-    exchange = RabbitMQ.exchange('message_created', :fanout)
-    queue = RabbitMQ.queue('message_created_elasticsearch_queue')
-    queue.bind(exchange)
+    exchange = RabbitMQ.exchange('', :direct)
+    queue = RabbitMQ.queue('message_created_queue')
+    # queue.bind(exchange)
 
     queue.subscribe(manual_ack: true) do |delivery_info, properties, payload|
       begin

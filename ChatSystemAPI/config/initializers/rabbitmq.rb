@@ -3,14 +3,14 @@ require 'bunny'
 class RabbitMQ
   def self.connection
     @connection ||= Bunny.new(
-                              host: 'localhost',
-                              port: '5672',
-                              username: 'user',
-                              password: 'bitnami',
-                              vhost: '/',
-                              connection_timeout: 5,
-                              heartbeat: 30,
-                              automatically_recover: true)
+      host: 'localhost',
+      port: '5672',
+      username: 'user',
+      password: 'bitnami',
+      vhost: '/',
+      connection_timeout: 5,
+      heartbeat: 30,
+      automatically_recover: true)
     @connection.start
   rescue Bunny::TCPConnectionFailedForAllHosts => e
     Rails.logger.error("Failed to connect to RabbitMQ: #{e.message}")
@@ -32,7 +32,7 @@ class RabbitMQ
     channel.queue(name, durable: true)
   end
 
-  def self.exchange(name, type = :fanout)
+  def self.exchange(name, type = :direct)
     channel.exchange(name, type: type, durable: true)
   end
 end

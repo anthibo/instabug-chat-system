@@ -1,5 +1,7 @@
 package messaging
 
+import "message_service/internal/events"
+
 type EventPublisherManager interface {
-	PublishEvent(event string, body []byte) error
+	PublishEvent(event events.EventQueue, eventData interface{}) error
 }

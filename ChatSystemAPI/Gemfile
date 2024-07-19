@@ -19,6 +19,7 @@ gem "redis", ">= 4.0.1"
 
 # SideKiq for background processing
 gem 'sidekiq'
+gem 'sidekiq-scheduler'
 
 # Elasticsearch for search
 gem 'elasticsearch-model'

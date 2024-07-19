@@ -1,0 +1,25 @@
+:concurrency: 5
+:queues:
+  - default
+
+:logging:
+  :enabled: true
+  :level: info
+  :format: default
+
+:verbose: false
+
+# Sidekiq Scheduler Configuration
+:scheduler:
+  :schedule:
+    update_counters_worker:
+      cron: "/1 * * * *" # Every 1 minute
+      class: "UpdateCountersJob"
+      queue: "default"
+
+:pidfile: tmp/pids/sidekiq.pid
+
+# You can also set other global options here, like redis url, namespace, etc.
+:redis:
+  :url: "redis://localhost:6379/0" # Redis connection URL
+  :namespace: "myapp_sidekiq"      # Optional namespace to prevent key collisions
