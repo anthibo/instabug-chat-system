@@ -53,12 +53,10 @@ To run the system locally, follow these steps:
    ```
 
 3. **Access the Services**:
-   - API (Reverse Proxy): `http://localhost:8080`
-   - Chat Main API: `http://localhost:3000`
-   - Command Message Service: `http://localhost:3001`
+   - Postman API Documentation: `https://documenter.getpostman.com/view/31068233/2sA3kUH2Xt`
+   - API: `http://localhost:8080`
    - RabbitMQ Management: `http://localhost:15672`
    - Elasticsearch: `http://localhost:9200`
-   - Kibana: `http://localhost:5601`
    - MySQL: `localhost:3306`
     - Username: `root`
     - Password: `password`
@@ -83,3 +81,6 @@ To run the system locally, follow these steps:
 
 - **Monitoring and Logging**: Enhance monitoring and logging to gain better insights into the system's behavior and performance.
 - **Scalability**: Explore ways to scale the system horizontally to handle increased load.
+
+# Current Issues:
+- `chat_main_api` and `sidekiq_worker` containers are not running from the first time, the ruby application just need a retry logic with exponential backoff to connect to dependencies just as elasticsearch and rabbitmq, I might provide a fix later but for now I overcome this issue by just re-running these containers again from Docker Desktop after around 15-20s

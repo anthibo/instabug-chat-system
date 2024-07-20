@@ -58,23 +58,6 @@ services:
         reservations:
           cpus: "1.0"
 
-  # Kibana service
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.14.3
-    container_name: kib_01
-    environment:
-      - "XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa"
-    ports:
-      - 5601:5601
-    depends_on:
-      - elasticsearch
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-        reservations:
-          cpus: "1.0"
-
   # Chat Main API service
   chat_main_api:
     build:
@@ -108,8 +91,8 @@ services:
       - SIDEKIQ_SCHEDULE_EXPRESSION=/1 * * * *
 
       - SERVER_PORT=3000
-    ports:
-      - 3000:3000
+    # ports:
+    #   - 3000:3000
     depends_on:
       - mysql
       - redis
@@ -154,8 +137,8 @@ services:
       context: ./MessagesService
       dockerfile: Dockerfile
     container_name: command_message_service
-    ports:
-      - 3001:3001
+    # ports:
+    #   - 3001:3001
     environment:
       - MYSQL_DSN=root:password@tcp(mysql:3306)/chat_system
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
