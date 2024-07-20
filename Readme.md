@@ -28,7 +28,7 @@ The system is designed as a microservices architecture, with the following compo
 4. **RabbitMQ**: Acts as a message broker to facilitate communication between services.
 5. **Sidekiq**: Processes background and queueing jobs for updating statistics and chat creation.
 6. **Elasticsearch**: Used for indexing and searching messages.
-7. **Redis**: For storing Sidekiq metadata and for caching chats and messages numbers.
+7. **Redis**: For storing Sidekiq metadata and caching chats and messages numbers.
 8. **RDBMS (MySQL)**: Stores relational data related to chat messages and users.
 
 ### System Architecture Diagram
@@ -83,4 +83,4 @@ To run the system locally, follow these steps:
 - **Scalability**: Explore ways to scale the system horizontally to handle increased load.
 
 # Current Issues:
-- `chat_main_api` and `sidekiq_worker` containers are not running from the first time, the ruby application just need a retry logic with exponential backoff to connect to dependencies just as elasticsearch and rabbitmq, I might provide a fix later but for now I overcome this issue by just re-running these containers again from Docker Desktop after around 15-20s
+- The `chat_main_api` and `sidekiq_worker` containers are not running from the first time, the ruby application just need a retry logic with exponential backoff to connect to dependencies just as elasticsearch and rabbitmq, I might provide a fix later but for now I overcome this issue by just re-running these containers again from Docker Desktop after around 15-20s
