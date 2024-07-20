@@ -29,10 +29,10 @@ func (s *MessageService) CreateMessage(ctx context.Context, messageCreationReque
 	log.Printf("Created message with ID %d for chat %d", message.ID, messageCreationRequestedEvent.ChatID)
 
 	messageCreatedEventData := &models.MessageCreatedEvent{
-		MessageID: message.ID,
-		Number:    message.Number,
-		ChatID:    message.ChatID,
-		Body:      message.Body,
+		MessageNumber:    message.Number,
+		ChatNumber:       messageCreationRequestedEvent.ChatNumber,
+		ApplicationToken: messageCreationRequestedEvent.ApplicationToken,
+		Body:             message.Body,
 	}
 
 	// TODO: add retry logic here for more resiliency
@@ -51,10 +51,11 @@ func (s *MessageService) CreateMessage(ctx context.Context, messageCreationReque
 }
 
 func (s *MessageService) GetChatId(ctx context.Context, applicationToken string, chatNumber int) (int, error) {
-	chat, err := s.ChatRepository.GetChatByChatNumber(ctx, applicationToken, chatNumber)
+	chatID, err := s.ChatRepository.GetChatByChatNumber(ctx, applicationToken, chatNumber)
 	if err != nil {
 		log.Printf("Failed to get chat ID from chat number %d: %v", chatNumber, err)
 		return -1, err
 	}
-	return chat.ID, nil
+
+	return chatID, nil
 }

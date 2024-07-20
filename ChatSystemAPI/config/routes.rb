@@ -5,10 +5,9 @@ Rails.application.routes.draw do
 
   resources :chats, param: :number, only: [:show, :index]
 
-  get 'chats/:chat_number/messages', to: 'messages#search'
+  get 'messages/', to: 'messages#search'
 
   get "up" => "rails/health#show", as: :rails_health_check
-
   # Defines the root path route ("/")
   # root "posts#index"
 end

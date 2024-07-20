@@ -20,14 +20,16 @@ type MessageResponse struct {
 }
 
 type MessageCreationRequestedEvent struct {
-	MessageNumber int    `json:"messageNumber"`
-	ChatID        int    `json:"chatID"`
-	Body          string `json:"body"`
+	MessageNumber    int    `json:"message_number"`
+	ChatID           int    `json:"chat_id"`
+	ChatNumber       int    `json:"chat_number"`
+	Body             string `json:"body"`
+	ApplicationToken string `json:"application_token"`
 }
 
 type MessageCreatedEvent struct {
-	MessageID int    `json:"id"`
-	Number    int    `json:"number"`
-	ChatID    int    `json:"chat_id"`
-	Body      string `json:"body"`
+	MessageNumber    int    `json:"message_number"`
+	ApplicationToken string `json:"application_token"`
+	ChatNumber       int    `json:"chat_number"`
+	Body             string `json:"body"`
 }

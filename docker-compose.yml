@@ -1,13 +1,47 @@
-version: '3'
+version: "3"
 services:
+  # MySQL service
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: chat_system
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # RabbitMQ service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  # Redis service
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+
+  # Elasticsearch service
   elasticsearch:
-    container_name: es01
+    container_name: es_01
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
-    environment: ['CLI_JAVA_OPTS=-Xms2g -Xmx2g','bootstrap.memory_lock=true','discovery.type=single-node','xpack.security.enabled=false', 'xpack.security.enrollment.enabled=false']
+    environment:
+      - "CLI_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "bootstrap.memory_lock=true"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "xpack.security.enrollment.enabled=false"
     ports:
       - 9200:9200
-    networks:
-      - elastic
     ulimits:
       memlock:
         soft: -1
@@ -15,28 +49,86 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    deploy:    
+    deploy:
       resources:
-          limits:
-            cpus: '2.0'
-          reservations:
-            cpus: '1.0'
-            
+        limits:
+          cpus: "2.0"
+        reservations:
+          cpus: "1.0"
+
+  # Kibana service
   kibana:
     image: docker.elastic.co/kibana/kibana:8.14.3
-    container_name: kib01
+    container_name: kib_01
     environment:
-      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa
+      - "XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa"
     ports:
       - 5601:5601
-    networks:
-      - elastic
-    deploy:    
+    depends_on:
+      - elasticsearch
+    deploy:
       resources:
-          limits:
-            cpus: '2.0'
-          reservations:
-            cpus: '1.0'
+        limits:
+          cpus: "2.0"
+        reservations:
+          cpus: "1.0"
 
-networks:
-  elastic:
+  # Chat Main API service
+  chat_main_api:
+    build:
+      context: ./ChatSystemAPI
+      dockerfile: Dockerfile
+    container_name: chat_main_api
+    environment:
+      - SECRET_KEY_BASE=fe46d2a29805dada30193beb6a7f200478ea58352a4a21d868988c3ef8bd32e2fc3e89300d3aaa62db4177829c42e89379365bbca3974493fd7eb1677a94f0ca
+      # Elasticsearch
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+
+      # MySQL
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=password
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=chat_system
+
+      # RabbitMQ
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
+
+      # Sidekiq
+      - SIDEKIQ_REDIS_URL=redis://redis:637/1
+      - SIDEKIQ_CONCURRENCY=5
+      - SIDEKIQ_SCHEDULE_EXPRESSION=/1 * * * *
+
+      - SERVER_PORT=3000
+    ports:
+      - 3000:3000
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+      - elasticsearch
+
+  message_service:
+    build:
+      context: ./MessagesService
+      dockerfile: Dockerfile
+    container_name: command_message_service
+    ports:
+      - 3001:3001
+    environment:
+      - MYSQL_DSN=root:password@tcp(mysql:3306)/chat_system
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - REDIS_URL=redis:6379
+      - SERVER_PORT=3001
+    depends_on:
+      - mysql
+      - rabbitmq
+      - redis
+volumes:
+  mysql_data:

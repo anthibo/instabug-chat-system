@@ -67,6 +67,7 @@ func startEventConsumersInBackground(app *AppDIContainer, rabbitMQ *messaging.Ra
 }
 
 func bootstrapServer(app *AppDIContainer, cfg *config.Config) {
+	println("mysql dsn: ", cfg.MySQLDSN)
 	dbConn, err := db.NewMySQLConn(cfg.MySQLDSN)
 	if err != nil {
 		log.Panic(fmt.Errorf("failed to connect to MySQL: %v", err))

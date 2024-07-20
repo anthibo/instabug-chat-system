@@ -3,10 +3,10 @@ require 'bunny'
 class RabbitMQ
   def self.connection
     @connection ||= Bunny.new(
-      host: 'localhost',
-      port: '5672',
-      username: 'user',
-      password: 'bitnami',
+      host: ENV['RABBITMQ_HOST'] || 'localhost',
+      port: ENV['RABBITMQ_PORT'] || 5672,
+      user: ENV['RABBITMQ_USER'] || 'guest',
+      password: ENV['RABBITMQ_PASSWORD'] || 'guest',
       vhost: '/',
       connection_timeout: 5,
       heartbeat: 30,

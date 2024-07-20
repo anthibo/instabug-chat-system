@@ -2,6 +2,7 @@ package caching
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -13,14 +14,18 @@ type RedisCacheManager struct {
 }
 
 func NewRedisCache(addr string, password string, db int) *RedisCacheManager {
-	rdb := redis.NewClient(&redis.Options{
+	log.Println("Connecting to Redis...")
+	log.Println("Address: ", addr)
+	log.Println("Password: ", password)
+	log.Println("DB: ", db)
+	redisClient := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
 		DB:       db,
 	})
 
 	return &RedisCacheManager{
-		client: rdb,
+		client: redisClient,
 		ctx:    context.Background(),
 	}
 }

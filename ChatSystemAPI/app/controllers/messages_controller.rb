@@ -4,14 +4,27 @@ class MessagesController < ApplicationController
   end
 
   def search
-    search_term = params[:search]
-    chat_number = params[:chat_number]
-    page = params[:page] || 1
-    per_page = params[:per_page] || 10
+    search_term = params[:body]
+    chat_number = (params[:chat_number]).to_i
+    application_token = (params[:application_token])
 
-    chat = Chat.find_by!(number: chat_number)
-    results = @message_service.search_messages(search_term, chat.id, page, per_page)
-    render json: results
+    if chat_number.blank? || application_token.blank?
+      render json: { errors: ['chat_number and application_token query params are required'] }, status: :bad_request
+      return
+    end
+
+    page = (params[:page] || 1).to_i
+    per_page = (params[:per_page] || 10).to_i
+
+    results = @message_service.search_messages(
+      search: search_term,
+      chat_number: chat_number,
+      application_token: application_token,
+      page: page,
+      per_page: per_page
+    )
+
+    render json: { items: results }
   end
 
 end

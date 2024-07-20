@@ -1,6 +1,7 @@
-:concurrency: 5
+:concurrency: <%= ENV.fetch("SIDEKIQ_CONCURRENCY") { 5 } %>
 :queues:
   - default
+  - create_chat_queue
 
 :logging:
   :enabled: true
@@ -9,17 +10,15 @@
 
 :verbose: false
 
-# Sidekiq Scheduler Configuration
 :scheduler:
   :schedule:
-    update_counters_worker:
-      cron: "/1 * * * *" # Every 1 minute
+    update_counters_job:
+      cron: "*/1 * * * *"
       class: "UpdateCountersJob"
       queue: "default"
 
 :pidfile: tmp/pids/sidekiq.pid
 
-# You can also set other global options here, like redis url, namespace, etc.
 :redis:
-  :url: "redis://localhost:6379/0" # Redis connection URL
-  :namespace: "myapp_sidekiq"      # Optional namespace to prevent key collisions
+  :url: <%= ENV.fetch("SIDEKIQ_REDIS_URL") { "redis://localhost:6379/1" } %>
+  :namespace: "chat_app_sidekiq"

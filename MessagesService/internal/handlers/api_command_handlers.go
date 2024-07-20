@@ -56,7 +56,7 @@ func (cmdHandler *ApiCmdHandlers) CreateMessageCmdHandler(w http.ResponseWriter,
 		helpers.ErrorJSON(w, err, http.StatusInternalServerError)
 		return
 	}
-	if chatId == 0 {
+	if chatId == -1 {
 		helpers.ErrorJSON(w, errors.New("chat not found"), http.StatusNotFound)
 		return
 	}
@@ -91,9 +91,11 @@ func (cmdHandler *ApiCmdHandlers) CreateMessageCmdHandler(w http.ResponseWriter,
 	}
 
 	var messageCreationRequestedEventData = models.MessageCreationRequestedEvent{
-		ChatID:        chatId,
-		Body:          message.Body,
-		MessageNumber: latestMessageNumberInt + 1,
+		ChatID:           chatId,
+		Body:             message.Body,
+		MessageNumber:    latestMessageNumberInt + 1,
+		ChatNumber:       chatNumber,
+		ApplicationToken: applicationToken,
 	}
 	fmt.Println("Publishing message creation requested event with data: ", messageCreationRequestedEventData)
 	var messageCreationRequestedEventQueue = events.EventQueues[events.MessageCreationRequestedQueue]

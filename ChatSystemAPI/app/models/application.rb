@@ -1,4 +1,5 @@
 class Application < ApplicationRecord
+  extend Pagination
   has_many :chats, dependent: :destroy
 
   validates :name, presence: true

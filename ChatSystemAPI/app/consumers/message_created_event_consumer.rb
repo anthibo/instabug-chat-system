@@ -1,8 +1,7 @@
 class MessageCreatedEventConsumer
   def self.start
-    exchange = RabbitMQ.exchange('', :direct)
+    RabbitMQ.exchange('', :direct)
     queue = RabbitMQ.queue('message_created_queue')
-    # queue.bind(exchange)
 
     queue.subscribe(manual_ack: true) do |delivery_info, properties, payload|
       begin
@@ -11,7 +10,7 @@ class MessageCreatedEventConsumer
 
         MessageSearch.index_message(message_data)
 
-        Rails.logger.info "Message search index updated for message: #{message_data['id']}"
+        Rails.logger.info "Message search index updated for message_number: #{message_data['message_number'] }"
         RabbitMQ.channel.ack(delivery_info.delivery_tag)
       rescue StandardError => e
         Rails.logger.error "Failed to update Elasticsearch index: #{e.message}"

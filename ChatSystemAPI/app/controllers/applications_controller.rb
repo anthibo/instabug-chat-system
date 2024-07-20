@@ -12,7 +12,7 @@ class ApplicationsController < ApplicationController
     per_page = (params[:per_page].presence || 10).to_i
     Rails.logger.info("Page: #{page}, Per page: #{per_page}")
     @applications = @application_service.all_applications(page: page, per_page: per_page)
-    render json: @applications
+    render json: { items: @applications }
   end
 
   def show

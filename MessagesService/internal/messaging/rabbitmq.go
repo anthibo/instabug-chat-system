@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"message_service/internal/events"
+	"message_service/internal/helpers"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -14,9 +16,31 @@ type RabbitMQConn struct {
 	conn *amqp.Connection
 }
 
+func retry[T any](fn func() (T, error), maxRetries int, delay time.Duration) (T, error) {
+	var err error
+	var res T
+	for i := 0; i < maxRetries; i++ {
+		fmt.Printf("Retry %d...\n", i+1)
+		res, err = fn()
+		if err == nil {
+			return res, nil
+		}
+		log.Printf("Retrying after error: %v in %d", err, delay)
+		time.Sleep(delay)
+	}
+	fmt.Println("Operation failed after max retries")
+	return res, err
+}
+
 func NewRabbitMQ(url string) (*RabbitMQConn, error) {
-	conn, err := amqp.Dial(url)
+	conn, err := helpers.Retry(func() (*amqp.Connection, error) {
+		log.Println("Connecting to RabbitMQ...")
+		conn, err := amqp.Dial(url)
+
+		return conn, err
+	}, 3, 15*time.Second)
 	if err != nil {
+		fmt.Println("Failed to connect to RabbitMQ")
 		return nil, err
 	}
 
