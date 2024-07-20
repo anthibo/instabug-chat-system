@@ -29,6 +29,8 @@ services:
     container_name: redis
     ports:
       - 6379:6379
+    volumes:
+      - redis_data:/data
 
   # Elasticsearch service
   elasticsearch:
@@ -114,6 +116,39 @@ services:
       - rabbitmq
       - elasticsearch
 
+  # Sidekiq service
+  sidekiq_worker:
+    build:
+      context: ./ChatSystemAPI
+      dockerfile: Dockerfile
+    container_name: sidekiq_worker
+    command: bundle exec sidekiq
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - SIDEKIQ_REDIS_URL=redis://redis:6379/1
+      - RAILS_ENV=production
+      - SECRET_KEY_BASE=fe46d2a29805dada30193beb6a7f200478ea58352a4a21d868988c3ef8bd32e2fc3e89300d3aaa62db4177829c42e89379365bbca3974493fd7eb1677a94f0ca
+      # MySQL
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=password
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=chat_system
+
+      # RabbitMQ
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+
+    depends_on:
+      - redis
+      - mysql
+      - rabbitmq
+      - elasticsearch
+
   message_service:
     build:
       context: ./MessagesService
@@ -130,5 +165,17 @@ services:
       - mysql
       - rabbitmq
       - redis
+
+  reverse_proxy:
+    image: nginx:latest
+    container_name: reverse_proxy
+    ports:
+      - 8080:8080
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - chat_main_api
+      - message_service
 volumes:
   mysql_data:
+  redis_data:
