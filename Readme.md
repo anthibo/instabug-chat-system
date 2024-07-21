@@ -53,7 +53,7 @@ To run the system locally, follow these steps:
    ```
 
 3. **Access the Services**:
-   - Postman API Documentation: `https://documenter.getpostman.com/view/31068233/2sA3kUH2Xt`
+   - Postman API Documentation: https://documenter.getpostman.com/view/31068233/2sA3kUH2Xt
    - API: `http://localhost:8080`
    - RabbitMQ Management: `http://localhost:15672`
    - Elasticsearch: `http://localhost:9200`
